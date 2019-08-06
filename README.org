@@ -3,13 +3,18 @@
   window managers that use X11's ewmh support (which is most of them). It has a system of matching
   and excluding and works on both window titles and window classes with regular expressions.
 ** Usage
-   usage: btf [<flags>] <program>
+#+begin_src shell
+  usage: btf [<flags>] [<program>]
 
-   Flags:
-    --help                 Show context-sensitive help (also try --help-long and --help-man).
+  Flags:
+        --help                 Show context-sensitive help (also try --help-long and --help-man).
     -m, --match=MATCH ...      Class or Title to match
     -e, --exclude=EXCLUDE ...  Class or Title to exclude
         --version              Show application version.
 
   Args:
-    <program>  program to launch if matching fails
+    [<program>]  program to launch if matching fails
+#+end_src 
+** Installation
+   ~go get -u github.com/chrispickard/btf~
+   
