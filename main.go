@@ -25,7 +25,7 @@ type Window struct {
 	Id    xproto.Window
 }
 
-func BuildProperties() ([]*Window, error) {
+func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 	// Connect to the X server using the DISPLAY environment variable.
 	// Get a list of all client ids.
 	clientids, err := ewmh.ClientListGet(X)
