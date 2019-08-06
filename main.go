@@ -11,12 +11,22 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
 	"regexp"
+	"strings"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/ewmh"
 	"github.com/BurntSushi/xgbutil/icccm"
+	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	matches  = kingpin.Flag("match", "Class or Title to match").Short('m').Strings()
+	excludes = kingpin.Flag("exclude", "Class or Title to exclude").Short('e').Strings()
+	program  = kingpin.Arg("program", "program to launch").Required().String()
 )
 
 type Window struct {
@@ -37,7 +47,18 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 
 	// Iterate through each client, find its name and find its size.
 	for _, clientid := range clientids {
-		name, err := icccm.WmNameGet(X, clientid)
+		name, err := ewmh.WmNameGet(X, clientid)
+
+		// If there was a problem getting _NET_WM_NAME or if its empty,
+		// try the old-school version.
+		if err != nil || len(name) == 0 {
+			name, err = icccm.WmNameGet(X, clientid)
+
+			// If we still can't find anything, give up.
+			if err != nil || len(name) == 0 {
+				return nil, err
+			}
+		}
 
 		// If we still can't find anything, give up.
 		if err != nil || len(name) == 0 {
@@ -57,24 +78,72 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 	return windows, nil
 }
 
+// FocusWindow ...
+func FocusWindow(X *xgbutil.XUtil, id xproto.Window) error {
+	return ewmh.ActiveWindowReq(X, id)
+}
+
+// from https://www.calhoun.io/concatenating-and-building-strings-in-go/
+func join(strs ...string) string {
+	var sb strings.Builder
+	for _, str := range strs {
+		sb.WriteString(str)
+	}
+	return sb.String()
+}
+
+// largely from https://www.calhoun.io/concatenating-and-building-strings-in-go/
+func buildMatcher(matches []string) (*regexp.Regexp, error) {
+	var sb strings.Builder
+	for _, str := range matches {
+		s := regexp.QuoteMeta(str)
+		sb.WriteString(s)
+	}
+	return regexp.Compile(sb.String())
+}
+
+// Yes, this is the same as the matcher, but they are semantically opposites
+// largely from https://www.calhoun.io/concatenating-and-building-strings-in-go/
+func buildExcluder(excludes []string) (*regexp.Regexp, error) {
+	var sb strings.Builder
+	for _, str := range excludes {
+		s := regexp.QuoteMeta(str)
+		sb.WriteString(s)
+	}
+	return regexp.Compile(sb.String())
+}
+
 func main() {
+	kingpin.Version("0.0.1")
+	kingpin.Parse()
 	X, err := xgbutil.NewConn()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r, err := buildMatcher(*matches)
+	if err != nil {
+		log.Fatal(err)
+	}
+	excluder, err := buildExcluder(*excludes)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	windows, err := BuildProperties(X)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	r, err := regexp.Compile("Fire")
-	if err != nil {
-		panic(err)
-	}
+
 	for _, w := range windows {
-		if r.FindString(w.Class) != "" {
-			fmt.Println(w)
+		if r.FindString(w.Name) != "" || r.FindString(w.Class) != "" {
+			if excluder.FindString(w.Name) == "" || excluder.FindString(w.Class) == "" {
+				FocusWindow(X, w.Id)
+				os.Exit(0)
+			}
 		}
 
 	}
+	fmt.Println("not found, opening", *program)
+	exec.Command(*program).Run()
 }
