@@ -26,7 +26,7 @@ import (
 var (
 	matches  = kingpin.Flag("match", "Class or Title to match").Short('m').Strings()
 	excludes = kingpin.Flag("exclude", "Class or Title to exclude").Short('e').Strings()
-	program  = kingpin.Arg("program", "program to launch").Required().String()
+	program  = kingpin.Arg("program", "program to launch if matching fails").String()
 )
 
 type Window struct {
