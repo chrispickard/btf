@@ -1,4 +1,4 @@
-module github.com/chrispickard/app-switcher
+module github.com/chrispickard/btf
 
 go 1.12
 
