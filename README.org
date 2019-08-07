@@ -1,5 +1,5 @@
 * bring to front
-  ~btf(1)~ is a system utility that will find and focus windows on your desktop. ~btf~ supports all
+  ~btf(1)~ is a system utility that will find, focus and launch windows on your desktop. ~btf~ supports all
   window managers that use X11's ewmh support (which is most of them). It has a system of matching
   and excluding and works on both window titles and window classes with regular expressions.
 ** Usage

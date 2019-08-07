@@ -20,6 +20,8 @@ import (
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/ewmh"
 	"github.com/BurntSushi/xgbutil/icccm"
+	"github.com/chrispickard/btf/version"
+	"github.com/mattn/go-shellwords"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -93,18 +95,7 @@ func join(strs ...string) string {
 }
 
 // largely from https://www.calhoun.io/concatenating-and-building-strings-in-go/
-func buildMatcher(matches []string) (*regexp.Regexp, error) {
-	var sb strings.Builder
-	for _, str := range matches {
-		s := regexp.QuoteMeta(str)
-		sb.WriteString(s)
-	}
-	return regexp.Compile(sb.String())
-}
-
-// Yes, this is the same as the matcher, but they are semantically opposites
-// largely from https://www.calhoun.io/concatenating-and-building-strings-in-go/
-func buildExcluder(excludes []string) (*regexp.Regexp, error) {
+func buildRegex(excludes []string) (*regexp.Regexp, error) {
 	var sb strings.Builder
 	for _, str := range excludes {
 		s := regexp.QuoteMeta(str)
@@ -114,18 +105,18 @@ func buildExcluder(excludes []string) (*regexp.Regexp, error) {
 }
 
 func main() {
-	kingpin.Version("0.0.1")
+	kingpin.Version(version.VERSION)
 	kingpin.Parse()
 	X, err := xgbutil.NewConn()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	r, err := buildMatcher(*matches)
+	r, err := buildRegex(*matches)
 	if err != nil {
 		log.Fatal(err)
 	}
-	excluder, err := buildExcluder(*excludes)
+	excluder, err := buildRegex(*excludes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -145,5 +136,12 @@ func main() {
 
 	}
 	fmt.Println("not found, opening", *program)
-	exec.Command(*program).Run()
+	words, err := shellwords.Parse(*program)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = exec.Command(words[0], words[1:]...).Start()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
