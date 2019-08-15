@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -18,9 +19,11 @@ import (
 )
 
 var (
-	matches  = kingpin.Flag("match", "Class or Title to match").Short('m').Strings()
-	excludes = kingpin.Flag("exclude", "Class or Title to exclude").Short('e').Strings()
-	program  = kingpin.Arg("program", "program to launch if matching fails").String()
+	app      = kingpin.New("btf", "bring to front")
+	list     = app.Flag("list", "list all properties").Short('l').Bool()
+	matches  = app.Flag("match", "Class or Title to match").Short('m').Strings()
+	excludes = app.Flag("exclude", "Class or Title to exclude").Short('e').Strings()
+	program  = app.Arg("program", "program to launch if matching fails").String()
 )
 
 type Window struct {
@@ -73,6 +76,13 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 }
 
 // FocusWindow ...
+func PrintProperties(windows []*Window, w io.Writer) {
+	for _, window := range windows {
+		fmt.Fprintf(w, "%s %s %v\n", window.Class, window.Name, window.Id)
+	}
+}
+
+// FocusWindow ...
 func FocusWindow(X *xgbutil.XUtil, id xproto.Window) error {
 	return ewmh.ActiveWindowReq(X, id)
 }
@@ -97,11 +107,14 @@ func buildRegex(excludes []string) (*regexp.Regexp, error) {
 }
 
 func main() {
-	kingpin.Version(version.VERSION)
-	kingpin.Parse()
+	app.Version(version.VERSION)
+	app.Parse(os.Args)
 	X, err := xgbutil.NewConn()
 	if err != nil {
 		log.Fatal(err)
+	}
+	if !*list && *program == os.Args[0] {
+		app.FatalUsage("either --list or <program> is required")
 	}
 
 	r, err := buildRegex(*matches)
@@ -116,6 +129,11 @@ func main() {
 	windows, err := BuildProperties(X)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if *list {
+		PrintProperties(windows, os.Stdout)
+		os.Exit(0)
 	}
 
 	for _, w := range windows {
