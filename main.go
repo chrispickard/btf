@@ -19,11 +19,11 @@ import (
 )
 
 var (
-	app      = kingpin.New("btf", "bring to front")
+	app      = kingpin.New("btf", "btf(1) is a system utility that will find, focus and launch windows on your X11 desktop.")
 	list     = app.Flag("list", "list all properties").Short('l').Bool()
 	matches  = app.Flag("match", "Class or Title to match").Short('m').Strings()
 	excludes = app.Flag("exclude", "Class or Title to exclude").Short('e').Strings()
-	program  = app.Arg("program", "program to launch if matching fails").String()
+	program  = app.Arg("program", "program to launch if matching fails").Strings()
 )
 
 type Window struct {
@@ -113,7 +113,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if !*list && *program == os.Args[0] {
+	if !*list && len(*program) == 1 {
 		app.FatalUsage("either --list or <program> is required")
 	}
 
@@ -145,8 +145,10 @@ func main() {
 		}
 
 	}
-	fmt.Println("not found, opening", *program)
-	words, err := shellwords.Parse(*program)
+	args := (*program)[1:]
+	line := join(args...)
+	fmt.Println("not found, opening", line)
+	words, err := shellwords.Parse(line)
 	if err != nil {
 		log.Fatal(err)
 	}
