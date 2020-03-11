@@ -1,3 +1,4 @@
+// Package version includes the version of btf
 package version
 
 // VERSION indicates which version of the binary is running.

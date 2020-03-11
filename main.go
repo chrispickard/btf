@@ -29,7 +29,7 @@ var (
 type Window struct {
 	Class string
 	Name  string
-	Id    xproto.Window
+	ID    xproto.Window
 }
 
 func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
@@ -48,14 +48,14 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 
 		// If there was a problem getting _NET_WM_NAME or if its empty,
 		// try the old-school version.
-		if err != nil || len(name) == 0 {
-			name, err = icccm.WmNameGet(X, clientid)
+		// if err != nil || len(name) == 0 {
+		// 	name, err = icccm.WmNameGet(X, clientid)
 
-			// If we still can't find anything, give up.
-			if err != nil || len(name) == 0 {
-				return nil, err
-			}
-		}
+		// 	// If we still can't find anything, give up.
+		// 	if err != nil || len(name) == 0 {
+		// 		return nil, err
+		// 	}
+		// }
 
 		// If we still can't find anything, give up.
 		if err != nil || len(name) == 0 {
@@ -68,7 +68,7 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 		window := &Window{
 			Class: class.Class,
 			Name:  name,
-			Id:    clientid,
+			ID:    clientid,
 		}
 		windows = append(windows, window)
 	}
@@ -78,7 +78,7 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 // FocusWindow ...
 func PrintProperties(windows []*Window, w io.Writer) {
 	for _, window := range windows {
-		fmt.Fprintf(w, "%s %s %v\n", window.Class, window.Name, window.Id)
+		fmt.Fprintf(w, "%s %s %v\n", window.Class, window.Name, window.ID)
 	}
 }
 
@@ -139,7 +139,7 @@ func main() {
 	for _, w := range windows {
 		if r.FindString(w.Name) != "" || r.FindString(w.Class) != "" {
 			if excluder.FindString(w.Name) == "" || excluder.FindString(w.Class) == "" {
-				FocusWindow(X, w.Id)
+				FocusWindow(X, w.ID)
 				os.Exit(0)
 			}
 		}
