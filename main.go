@@ -75,7 +75,7 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 	return windows, nil
 }
 
-// FocusWindow ...
+// PrintProperties dumps the properties of `windows` to `w`
 func PrintProperties(windows []*Window, w io.Writer) {
 	for _, window := range windows {
 		fmt.Fprintf(w, "%s %s %v\n", window.Class, window.Name, window.ID)
