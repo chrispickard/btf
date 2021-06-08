@@ -1,13 +1,9 @@
-{ pkgs ? import <nixpkgs> { }
-
-, stdenv ? pkgs.stdenv
-, buildGoModule ? pkgs.buildGoModule
-, fetchFromGitHub ? pkgs.fetchFromGitHub
-# We use this to add matchers for stuff that's not in upstream nixpkgs, but is
-# in our own overlay. No fuzzy matching from multiple options here, it's just:
-# Was the command `, mything`? Run `nixpkgs.mything`.
-, overlayPackages ? []
-}:
+{ pkgs ? import <nixpkgs> { }, stdenv ? pkgs.stdenv, lib ? pkgs.lib
+, buildGoModule ? pkgs.buildGoModule, fetchFromGitHub ? pkgs.fetchFromGitHub
+  # We use this to add matchers for stuff that's not in upstream nixpkgs, but is
+  # in our own overlay. No fuzzy matching from multiple options here, it's just:
+  # Was the command `, mything`? Run `nixpkgs.mything`.
+, overlayPackages ? [ ] }:
 
 buildGoModule rec {
   pname = "btf";
@@ -33,7 +29,7 @@ buildGoModule rec {
     )
   '';
 
-  meta = with stdenv.lib; {
+  meta = with lib; {
     homepage = "https://github.com/chrispickard/btf";
     description = "A simple, keyboard driven app switcher/launcher for x11";
     license = licenses.asl20;
