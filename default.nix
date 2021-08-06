@@ -7,13 +7,13 @@
 
 buildGoModule rec {
   pname = "btf";
-  version = "0.0.1";
+  version = lib.removeSuffix "\n" (builtins.readFile ./VERSION);
 
   src = fetchFromGitHub {
     owner = "chrispickard";
     repo = "btf";
     rev = "v${version}";
-    sha256 = "1713dg6ylzdzc4pg4xsz2p6m1vrsnngxlvvhx47w9lls30sqvjjn";
+    sha256 = "13xm84h7hw35dsfahabpmcg42xb6acqnr1r59qqqk5r19xnf1gy7";
   };
 
   vendorSha256 = "1pdp7a43lw0jzqsca63c501ra659l0231zjkydi69632zghc80as";
