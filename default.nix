@@ -9,7 +9,7 @@ buildGoModule rec {
   pname = "btf";
   version = lib.removeSuffix "\n" (builtins.readFile ./VERSION);
 
-  src = ./.;
+  src = lib.cleanSource ./.;
 
   vendorSha256 = "1pdp7a43lw0jzqsca63c501ra659l0231zjkydi69632zghc80as";
 
