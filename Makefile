@@ -109,7 +109,7 @@ release: *.go VERSION ## Builds the cross-compiled binaries, naming them in such
 .PHONY: bump-version
 BUMP := patch
 bump-version: ## Bump the version in the version file. Set BUMP to [ patch | major | minor ]
-	@go get -u github.com/jessfraz/junk/sembump # update sembump tool
+	@go install github.com/jessfraz/junk/sembump@latest # update sembump tool
 	$(eval NEW_VERSION = $(shell sembump --kind $(BUMP) $(VERSION)))
 	@echo "Bumping VERSION from $(VERSION) to $(NEW_VERSION)"
 	echo $(NEW_VERSION) > VERSION
