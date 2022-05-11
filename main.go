@@ -27,9 +27,10 @@ var (
 )
 
 type Window struct {
-	Class string
-	Name  string
-	ID    xproto.Window
+	Class    string
+	Instance string
+	Name     string
+	ID       xproto.Window
 }
 
 func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
@@ -66,9 +67,10 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 			return nil, err
 		}
 		window := &Window{
-			Class: class.Class,
-			Name:  name,
-			ID:    clientid,
+			Class:    class.Class,
+			Instance: class.Instance,
+			Name:     name,
+			ID:       clientid,
 		}
 		windows = append(windows, window)
 	}
@@ -78,7 +80,7 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 // PrintProperties dumps the properties of `windows` to `w`
 func PrintProperties(windows []*Window, w io.Writer) {
 	for _, window := range windows {
-		fmt.Fprintf(w, "%s %s %v\n", window.Class, window.Name, window.ID)
+		fmt.Fprintf(w, "%s %s %s %v\n", window.Class, window.Instance, window.Name, window.ID)
 	}
 }
 
@@ -137,9 +139,12 @@ func main() {
 	}
 
 	for _, w := range windows {
-		if r.FindString(w.Name) != "" || r.FindString(w.Class) != "" {
-			if excluder.FindString(w.Name) == "" || excluder.FindString(w.Class) == "" {
-				FocusWindow(X, w.ID)
+		if r.FindString(w.Name) != "" || r.FindString(w.Class) != "" || r.FindString(w.Instance) != "" {
+			if excluder.FindString(w.Name) == "" || excluder.FindString(w.Class) == "" || excluder.FindString(w.Instance) == "" {
+				err := FocusWindow(X, w.ID)
+				if err != nil {
+					log.Println(err)
+				}
 				os.Exit(0)
 			}
 		}
