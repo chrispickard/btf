@@ -140,7 +140,7 @@ func main() {
 
 	for _, w := range windows {
 		if r.FindString(w.Name) != "" || r.FindString(w.Class) != "" || r.FindString(w.Instance) != "" {
-			if excluder.FindString(w.Name) == "" || excluder.FindString(w.Class) == "" || excluder.FindString(w.Instance) == "" {
+			if excluder.FindString(w.Name) == "" && excluder.FindString(w.Class) == "" && excluder.FindString(w.Instance) == "" {
 				err := FocusWindow(X, w.ID)
 				if err != nil {
 					log.Println(err)
