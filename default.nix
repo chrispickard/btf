@@ -11,7 +11,7 @@ buildGoModule rec {
 
   src = lib.cleanSource ./.;
 
-  vendorSha256 = "1pdp7a43lw0jzqsca63c501ra659l0231zjkydi69632zghc80as";
+  vendorHash = "sha256-WgHE4PtimGRi81P+MASgqRiVAyhsGMU0/hJwOog6t90=";
 
   # Since the tarball pulled from GitHub doesn't contain git tag information,
   # we fetch the expected tag's timestamp from a file in the root of the
