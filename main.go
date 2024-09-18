@@ -60,11 +60,11 @@ func BuildProperties(X *xgbutil.XUtil) ([]*Window, error) {
 
 		// If we still can't find anything, give up.
 		if err != nil || len(name) == 0 {
-			return nil, err
+			return windows, err
 		}
 		class, err := icccm.WmClassGet(X, clientid)
 		if err != nil || len(name) == 0 {
-			return nil, err
+			return windows, nil
 		}
 		window := &Window{
 			Class:    class.Class,
